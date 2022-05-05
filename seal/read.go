@@ -67,14 +67,14 @@ func Seal(storePath string, filePath filestore.Path) []byte {
 	fmt.Println("pieceSize(2^14) : ", int(pieceSize) * int(pieceNum))
 	
 	d := f.ToBinary()
-	var seala []*big.Int
+	// var seala []*big.Int
 	for i := 0; i < pieceNum; i++ {
 		p := d[i*pieceSize : (i+1) * pieceSize]
 		fmt.Println(i, " piceSize : ", len(p))
 		pieceBigInt := byteToBigInt(p)
 		fmt.Println(i, " big Int :", pieceBigInt)
 		
-		go func(a big.Int, b)
+		// go func(a big.Int, b)
 	}
 
 	return ret
