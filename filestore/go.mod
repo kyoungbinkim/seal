@@ -1,4 +1,4 @@
-module github.com/filecoin-project/go-fil-filestore
+module github.com/kyoungbinkim/seal/filestore
 
 go 1.13
 
