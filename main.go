@@ -18,7 +18,12 @@ func main(){
 
 	fmt.Println("file size : ", len(f))
 
-	c.KeyGen(32768)
+	//32768
+	c.KeyGen(65536)
+	sk := c.LoadSk(65536)
+	pk := sk.PublicKey
+	fmt.Println("sk D : ", sk.D)
+	fmt.Println("pk E : ", pk.E)
 	// b := []byte()
 	// n,err := f.Read(b)
 	// fmt.Println("b",b,n,err);

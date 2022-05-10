@@ -8,6 +8,7 @@ import (
 	"math/big" 
 
 	"encoding/hex"
+	// "crypto/rsa"
 
 	filestore "github.com/kyoungbinkim/seal/filestore"
 )
@@ -25,7 +26,6 @@ func byteToBigInt(data []byte) *big.Int{
 }
 
 // func seal_core(d big.Int, pk big.Int, g big.Int){
-	
 // }
 
 func ReadFile(path string, ) ([]byte, string) {
@@ -59,7 +59,7 @@ func Seal(storePath string, filePath filestore.Path) []byte {
 	fmt.Println(f)
 
 	SectorBitSize := math.Pow(2,16)
-	pieceSize := int( math.Pow(2,14)	)// 16KiB
+	pieceSize := int( math.Pow(2,14) )// 16KiB
 	pieceNum := len(f.ToBinary()) / int(pieceSize)
 	fmt.Println(f.ToBinary(), hex.EncodeToString(f.ToBinary()))
 	fmt.Println("file : ",len(f.ToBinary()),"bytes")
@@ -78,4 +78,9 @@ func Seal(storePath string, filePath filestore.Path) []byte {
 	// }
 
 	return ret
+}
+
+
+func Sealing(sector filestore.File, fs filestore.filestore, pk *rsa.PublicKey){
+	sectorBytes := sector.ToBinary()
 }

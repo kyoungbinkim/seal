@@ -14,7 +14,8 @@ import(
 
 	"fmt"
 	"io"
-	// "os"
+	"os"
+	"encoding/gob"
 	"math"
 	"math/big"
 	"crypto/rsa"
@@ -57,13 +58,37 @@ func KeyGen(bits int) (*rsa.PrivateKey, error){
 	}
 	pk := sk.PublicKey
 
-	fmt.Println("sk : ", sk.D, sk)
-	fmt.Println("primes", sk.Primes[0].BitLen(), sk.Primes[1].BitLen())
+	fmt.Println("sk : ", sk.D)
+	// fmt.Println("primes", sk.Primes[0].BitLen(), sk.Primes[1].BitLen())
 	fmt.Println("pk : ", pk.E)
+
+	skFile, err := os.Create(fmt.Sprint(bits) + "bits_private.key")
+	if err != nil{
+		panic(err)
+		os.Exit(1)
+	}
+
+	skEncoder := gob.NewEncoder(skFile)
+	skEncoder.Encode(*sk)
+	skFile.Close()
+
 	return sk,err
 }
 
+func LoadSk(bits int) (*rsa.PrivateKey) {
+	keyFile,err := os.Open(fmt.Sprint(bits)+"bits_private.key")
+	if err != nil{
+		os.Exit(1)
+		panic(err)
+	}
+	var sk rsa.PrivateKey
+	skDecoder := gob.NewDecoder(keyFile)
+	skDecoder.Decode(&sk)
+	
+	fmt.Println(sk.D)
 
+	return &sk
+}
 
 // MaybeReadByte reads a single byte from r with ~50% probability. This is used
 // to ensure that callers do not depend on non-guaranteed behaviour, e.g.
@@ -177,9 +202,3 @@ NextSetOfPrimes:
 	priv.Precompute()
 	return priv, nil
 }
-
-
-// func SaveKey(sk *rsa.PrivateKey, path string, fs fs.fileStore) {
-// 	var skPath string
-
-// }
