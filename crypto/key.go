@@ -8,7 +8,7 @@
 */
 
 
-package crypto
+package c
 
 import(
 
@@ -39,6 +39,12 @@ import(
 // 	Primes    []*big.Int // prime factors of N, has >= 2 elements.
 // }
 
+type Key struct{
+	N *big.Int
+	E *big.Int
+	D *big.Int
+}
+
 var bigZero = big.NewInt(0)
 var bigOne = big.NewInt(1)
 
@@ -47,32 +53,47 @@ var (
 	closedChan     chan struct{}
 )
 
-func KeyGen(bits int) (*rsa.PrivateKey, error){
+func KeyGen(bits int) (*Key, error){
 	tic := time.Now()
 	// sk, err := rsa.GenerateKey(rand.Reader, bits) //65536
-	sk, err := GenerateMultiPrimeKey(rand.Reader,2, bits)
+	key := new(Key)
+	key.D = big.NewInt(3)
+	key.E = new(big.Int)
+	random := rand.Reader
+	// tmp := new(big.Int)
+	order := new(big.Int)
+	MaybeReadByte(random)
+	fmt.Println("D : ", key.D)
+	for {
+		s := time.Now()
+		key.N, _ = rand.Prime(random, bits)
+		fmt.Println("pick Prime time : ", time.Since(s))
+		order.Sub(key.N, bigOne)
+		if  key.E.ModInverse(key.D, order) != nil {			
+			break
+		}
+		
+	}
+
 	toc := time.Since(tic)
 	fmt.Println("keyGen takes : ", toc)
-	if err != nil{
-		panic(err)
-	}
-	pk := sk.PublicKey
-
-	fmt.Println("sk : ", sk.D)
+	
+	fmt.Println("N : ", key.N.BitLen())
+	fmt.Println("d : ", key.D.BitLen())
 	// fmt.Println("primes", sk.Primes[0].BitLen(), sk.Primes[1].BitLen())
-	fmt.Println("pk : ", pk.E)
+	fmt.Println("e : ", key.E.BitLen())
 
-	skFile, err := os.Create(fmt.Sprint(bits) + "bits_private.key")
+	keyFile, err := os.Create(fmt.Sprint(bits) + "bits.key")
 	if err != nil{
 		panic(err)
 		os.Exit(1)
 	}
 
-	skEncoder := gob.NewEncoder(skFile)
-	skEncoder.Encode(*sk)
-	skFile.Close()
+	keyEncoder := gob.NewEncoder(keyFile)
+	keyEncoder.Encode(*key)
+	keyFile.Close()
 
-	return sk,err
+	return key, err
 }
 
 func LoadSk(bits int) (*rsa.PrivateKey) {

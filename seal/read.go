@@ -11,6 +11,7 @@ import (
 	// "crypto/rsa"
 
 	filestore "github.com/kyoungbinkim/seal/filestore"
+	c "github.com/kyoungbinkim/seal/crypto"
 )
 
 // type piece struct{
@@ -39,7 +40,12 @@ func ReadFile(path string, ) ([]byte, string) {
 }
 
 
-func Seal(storePath string, filePath filestore.Path) []byte {
+func Seal(storePath string, filePath filestore.Path, key *c.Key) []byte {
+	// pk := key.E
+	// N := key.N
+
+	fmt.Println("pk : ", key.E.BitLen())
+	
 	p, _ := filepath.Abs(string(storePath))
 	fmt.Println("Seal path : ", p)
 	fs, err := filestore.NewLocalFileStore(storePath)
@@ -74,13 +80,16 @@ func Seal(storePath string, filePath filestore.Path) []byte {
 	// 	pieceBigInt := byteToBigInt(p)
 	// 	fmt.Println(i, " big Int :", pieceBigInt)
 		
-	// 	// go func(a big.Int, b)
+	// 	go func(a *big.Int, b *big.Int, N *big.Int, ret *big.Int){
+	// 		ret = 
+	// 	}
 	// }
 
 	return ret
 }
 
 
-func Sealing(sector filestore.File, fs filestore.filestore, pk *rsa.PublicKey){
-	sectorBytes := sector.ToBinary()
-}
+// func Sealing(sector filestore.File, fs filestore.filestore, pk *rsa.PublicKey){
+// 	sectorBytes := sector.ToBinary()
+	
+// }
