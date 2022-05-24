@@ -1,4 +1,4 @@
-module github.com/kyoungbinkim/main
+module github.com/kyoungbinkim/seal/main
 
 go 1.17
 

@@ -24,7 +24,7 @@ import(
 	"sync"
 	"errors"
 
-	// fs "github.com/kyoungbinkim/seal/filestore"
+	fs "github.com/kyoungbinkim/seal/filestore"
 )
 
 
@@ -53,7 +53,7 @@ var (
 	closedChan     chan struct{}
 )
 
-func KeyGen(bits int) (*Key, error){
+func KeyGenX(bits int) (*Key, error){
 	tic := time.Now()
 	// sk, err := rsa.GenerateKey(rand.Reader, bits) //65536
 	key := new(Key)
@@ -109,6 +109,69 @@ func LoadSk(bits int) (*rsa.PrivateKey) {
 	fmt.Println(sk.D)
 
 	return &sk
+}
+
+func KeyGen(f fs.FileStore, keyPath fs.Path) *Key {
+	keyFile,err := f.Open(keyPath)
+	if err != nil {
+		panic(err)
+	}
+	k := Key{
+		keyFile.ToBigInt(),
+		big.NewInt(1),
+		big.NewInt(1),
+	}
+
+	order :=big.NewInt(0)
+	order.Sub(k.N, bigOne)
+	bigTwo := big.NewInt(2)
+	fmt.Println("order : ", order)
+	for {
+		
+		for{
+			k.D.Add(k.D, bigTwo)
+			if k.D.ProbablyPrime(0) {
+				break
+			}
+		}
+
+		k.E.ModInverse(k.D, order)
+		
+		if k.E.Cmp(bigOne) != 0 {
+			fmt.Println("k.E : ", k.E)
+			break
+		}
+	}	
+	fmt.Println("k.D : " , k.D)
+	fmt.Println(fs.Path("./key.bin"))
+	// ffs, err :=fs.FileStore.Create()
+	myKeyFile, err := f.Create("./key.bin")
+	if err != nil {
+		panic(err)
+	}
+
+	keyEncoder := gob.NewEncoder(myKeyFile)
+	keyEncoder.Encode(k)
+	myKeyFile.Close()
+	
+
+	return &k;
+}
+
+func LoadKey(f fs.FileStore) *Key {
+	fmt.Println("====== load Key ======")
+	keyFile,err := f.Open(fs.Path("key.bin"))
+	if err != nil{
+		os.Exit(1)
+		panic(err)
+	}
+	var k Key
+	keyDecoder := gob.NewDecoder(keyFile)
+	keyDecoder.Decode(&k)
+	
+	fmt.Println(k.D)
+
+	return &k
 }
 
 // MaybeReadByte reads a single byte from r with ~50% probability. This is used
